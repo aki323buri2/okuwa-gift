@@ -42,6 +42,9 @@ $(function ()
 			, data: handsonData()
 			, rowHeaders: true
 			, afterChange: handsonAfterChange
+			, afterRemoveRow: handsonAfterRemoveRow
+			, afterRemoveCol: handsonAfterRemoveCol
+			, contextMenu: true
 		});
 		return hot.handsontable('getInstance');
 	}
@@ -86,13 +89,24 @@ $(function ()
 	function handsonAfterChange(changes, source)
 	{
 		if (source === 'loadData') return;
-		var data = this.getData();
+		saveData();
+	}
+	function handsonAfterRemoveRow(index, amount)
+	{
+		saveData();
+	}
+	function handsonAfterRemoveCol(index, amount)
+	{
+		saveData();
+	}
+	function saveData()
+	{
+		var data = hot.getData();
 		var objects = handsonValuesToObjects(data);
 		putSession(JSON.stringify(objects));
 	}
 	function putSession(value)
 	{
-		return;
 		$.ajax({
 			url: '{{ url('/catalog/session') }}'
 			, method: 'post'
