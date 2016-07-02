@@ -27,8 +27,8 @@ $links = $links->toArray();
 @foreach ((array)@$links['js'] as $url)
 	<script src="{{ url($url) }}"></script>
 @endforeach
-@stack('scripts')
 @stack('styles')
+@stack('scripts')
 </head>
 <body>
 <div id="topbar">

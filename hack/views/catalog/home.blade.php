@@ -9,6 +9,10 @@ $columns = $catalog->getColumns();
 ?>
 @push('styles')
 <style>
+#paste
+{
+	width: 25rem;
+}
 @foreach ($columns as $name => $column)
 	#handson .{{ $name }} { width: {{ $column->width }}; }
 @endforeach
@@ -18,6 +22,10 @@ $columns = $catalog->getColumns();
 <p>
 	商品カタログ
 </p>
+<div class="ui left icon input paste" id="paste">
+	<i class="paste icon"></i>
+	<input type="text" placeholder="ここを右クリックして貼り付けをクリック">
+</div>
 <div id="handson"></div>
 @endsection
 @push('scripts')
@@ -25,6 +33,7 @@ $columns = $catalog->getColumns();
 $(function ()
 {
 	var hot = handson($('#handson'));
+	hackPaste($('#paste'), hot);
 
 	function handson(el)
 	{
@@ -110,6 +119,34 @@ $(function ()
 			objects.push(object);
 		});
 		return objects;
+	}
+	function hackPaste(input, hot)
+	{
+		input.on('paste', function (e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+			var clipboardData = e.clipboardData || e.originalEvent.clipboardData;
+			var format = 'text/plain';
+			if (clipboardData === undefined)
+			{
+				//IE..
+				clipboardData = window.clipboardData;
+				format = 'text';
+			}
+			var data = clipboardData.getData(format);
+			
+			//行末の改行コードを取り除くため、テキストエリアを踏み台にする
+			var textarea = $('<textarea>')
+				.appendTo('body')
+				.val(data)
+			;
+			var data = textarea.val();
+			textarea.remove();
+
+			hot.selectCell(0, 0);
+			hot.copyPaste.triggerPaste(null, data);
+		});
 	}
 });
 </script>
