@@ -16,3 +16,4 @@
 // });
 
 \App\Http\Controllers\HomeController::route();
+\App\Http\Controllers\CatalogController::route();

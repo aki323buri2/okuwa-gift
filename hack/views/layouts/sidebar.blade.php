@@ -17,5 +17,11 @@
 </style>
 @endpush
 @section('sidebar')
-sidebar..
+<div class="ui vertical menu">
+	@foreach (range(1, 10) as $no)
+		<a href="#" class="item" id="sidemenu{{ $no }}">
+			menu {{ $no }}
+		</a>
+	@endforeach
+</div>
 @endsection

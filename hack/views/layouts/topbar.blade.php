@@ -31,6 +31,10 @@
 		<i class="home icon"></i>
 		Home
 	</a>
+	<a href="{{ url('/catalog') }}" class="item">
+		<i class="book icon"></i>
+		商品カタログ
+	</a>
 
 	<div class="ui right menu">
 		<div class="item">
