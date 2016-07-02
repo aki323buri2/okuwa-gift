@@ -1,0 +1,26 @@
+/*******************************
+         Site Settings
+*******************************/
+/* 
+@headerFont        : @fontName, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+@pageFont          : @fontName, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+@emSize   : 14px;
+@fontSize : 14px;
+@inputVerticalPadding   : @relative11px;
+@inputHorizontalPadding : @relative14px;
+@subtleShadow:
+  0px 1px 2px 0 @borderColor
+;
+@floatingShadow:
+  0px 2px 4px 0px rgba(34, 36, 38, 0.12),
+  0px 2px 10px 0px rgba(34, 36, 38, 0.08)
+;
+ */
+@headerFont        : @fontName, 'Helvetica Neue', Meiryo, Arial, Helvetica, sans-serif;
+@pageFont          : @fontName, 'Helvetica Neue', Meiryo, Arial, Helvetica, sans-serif;
+@emSize   : 12px;
+@fontSize : 12px;
+@inputVerticalPadding   : .3rem;
+@inputHorizontalPadding : .5rem;
+@subtleShadow: none;
+@floatingShadow: none;
