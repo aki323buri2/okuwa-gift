@@ -38,5 +38,27 @@ class Catalog extends Model
 			$columns[] = (object)array_combine($names, $value);
 		}
 		$this->columns = collect($columns)->keyBy('name');
+		
+		$widths = [
+			'catno'  => '100px', 
+			'shcds'  => '100px', 
+			'eoscd'  => '100px', 
+			'mekame' => '150px', 
+			'shiren' => '100px', 
+			'hinmei' => '250px', 
+			'sanchi' => '150px', 
+			'tenyou' => '100px', 
+			'nouka'  => '100px', 
+			'baika'  => '100px', 
+			'stanka' => '100px', 
+		];
+		foreach ($this->columns as $name => &$column)
+		{
+			$column->width = $widths[$name];
+		}
+    }
+    public function getColumns()
+    {
+    	return $this->columns;
     }
 }

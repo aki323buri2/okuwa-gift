@@ -11,17 +11,28 @@ use App\Catalog;
 
 class CatalogController extends Controller
 {
+    static public function route()
+    {
+    	Route::get('/catalog', 'CatalogController@index');
+    	Route::post('/catalog/session', 'CatalogController@session');
+    }
+	
 	protected $catalog;
+	protected $sessionKey = 'catalog/session';
+
 	public function __construct(Catalog $catalog)
 	{
 		$this->catalog = $catalog;
 	}
-    static public function route()
-    {
-    	Route::get('/catalog', 'CatalogController@index');
-    }
     public function index(Request $request)
     {
-    	return view('catalog/home');
+    	$data = $request->session()->get($this->sessionKey);
+    	return view('catalog/home', ['catalog' => $this->catalog, 'data' => $data]);
+    }
+    public function session(Request $request)
+    {
+    	$key = $this->sessionKey;
+    	$value = $request->input('value');
+    	$request->session()->put($key, $value);
     }
 }
