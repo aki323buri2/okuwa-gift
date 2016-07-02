@@ -92,6 +92,7 @@ $(function ()
 	}
 	function putSession(value)
 	{
+		return;
 		$.ajax({
 			url: '{{ url('/catalog/session') }}'
 			, method: 'post'
@@ -102,7 +103,7 @@ $(function ()
 		})
 		.always(function (data, xhr, error, thrown)
 		{
-			console.log(data);
+			//
 		})
 		;
 	}
@@ -122,6 +123,15 @@ $(function ()
 	}
 	function hackPaste(input, hot)
 	{
+		//handsontableのセル選択情報をinputにメモる
+		//（handsontableで選択中のセル位置情報を取得するメソッドが見つからない・・・）
+		input.data('selection', JSON.stringify([0, 0, 0, 0]));
+		hot.updateSettings({
+			afterSelection: function (r, c, r2, c2)
+			{
+				input.data('selection', JSON.stringify([r, c, r2, c2]));
+			}
+		});
 		input.on('paste', function (e)
 		{
 			e.preventDefault();
@@ -144,7 +154,9 @@ $(function ()
 			var data = textarea.val();
 			textarea.remove();
 
-			hot.selectCell(0, 0);
+			var selection = JSON.parse(input.data('selection'));
+			console.log(selection);
+			hot.selectCell(selection[0], selection[1]);
 			hot.copyPaste.triggerPaste(null, data);
 		});
 	}
