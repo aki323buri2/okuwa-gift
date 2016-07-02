@@ -42,6 +42,9 @@ $(function ()
 			, data: handsonData()
 			, rowHeaders: true
 			, afterChange: handsonAfterChange
+			, afterRemoveRow: handsonAfterRemoveRow
+			, afterRemoveCol: handsonAfterRemoveCol
+			, contextMenu: true
 		});
 		return hot.handsontable('getInstance');
 	}
@@ -86,7 +89,19 @@ $(function ()
 	function handsonAfterChange(changes, source)
 	{
 		if (source === 'loadData') return;
-		var data = this.getData();
+		saveData();
+	}
+	function handsonAfterRemoveRow(index, amount)
+	{
+		saveData();
+	}
+	function handsonAfterRemoveCol(index, amount)
+	{
+		saveData();
+	}
+	function saveData()
+	{
+		var data = hot.getData();
 		var objects = handsonValuesToObjects(data);
 		putSession(JSON.stringify(objects));
 	}
@@ -102,7 +117,7 @@ $(function ()
 		})
 		.always(function (data, xhr, error, thrown)
 		{
-			console.log(data);
+			//
 		})
 		;
 	}
@@ -122,6 +137,15 @@ $(function ()
 	}
 	function hackPaste(input, hot)
 	{
+		//handsontableのセル選択情報をinputにメモる
+		//（handsontableで選択中のセル位置情報を取得するメソッドが見つからない・・・）
+		input.data('selection', JSON.stringify([0, 0, 0, 0]));
+		hot.updateSettings({
+			afterSelection: function (r, c, r2, c2)
+			{
+				input.data('selection', JSON.stringify([r, c, r2, c2]));
+			}
+		});
 		input.on('paste', function (e)
 		{
 			e.preventDefault();
@@ -144,9 +168,16 @@ $(function ()
 			var data = textarea.val();
 			textarea.remove();
 
-			hot.selectCell(0, 0);
+			var selection = JSON.parse(input.data('selection'));
+			hot.selectCell(selection[0], selection[1]);
 			hot.copyPaste.triggerPaste(null, data);
-		});
+		})
+		.on('change keydown keypress keyup', function (e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+		})
+		;
 	}
 });
 </script>
