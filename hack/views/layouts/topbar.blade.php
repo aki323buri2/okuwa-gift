@@ -14,13 +14,18 @@
 {
 	right: .3rem;
 }
+.ui.menu .header.item > img.icon
+{
+	width: 1.5rem;
+	margin-right: .5rem;
+}
 </style>
 @endpush
 @section('topbar')
 <div class="ui menu">
 	<a href="{{ url('/') }}" class="header item">
-		<i class="building icon"></i>
-		Brand
+		<img src='{{ url('/images/okuwa.png') }}' class='icon'>
+		オークワギフト
 	</a>
 	<a href="{{ url('/home') }}" class="item">
 		<i class="home icon"></i>
