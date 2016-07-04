@@ -12,8 +12,9 @@ class HomeController extends Controller
 {
     static public function route()
     {
-    	Route::get('/', 'HomeController@home');
-    	Route::get('/home', 'HomeController@home');
+    	$class = '\\' . __class__;
+    	Route::get('/', $class . '@home');
+    	Route::get('/home', $class . '@home');
     }
     public function home(Request $request)
     {
