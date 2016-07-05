@@ -18,6 +18,7 @@ class CatalogController extends Controller
     	Route::post('/catalog/session', $class . '@session');
     	Route::get ('/catalog/validator', $class . '@validator');
     	Route::post('/catalog/check-update', $class . '@checkUpdate');
+    	Route::post('/catalog/do-update', $class . '@doUpdate');
     }
 	
 	protected $catalog;
@@ -57,10 +58,43 @@ class CatalogController extends Controller
 
     	$catalog = $this->catalog;
     	$find = $catalog->find($catno);
+
     	$update = $find ? 'update' : 'insert';
 
-    	$data = (object)[];
-    	$data->update = $update;
-    	return json_encode($data);
+    	$result = (object)[];
+    	$result->update = $update;
+    	return json_encode($result);
+    }
+    public function doUpdate(Request $request)
+    {
+    	$update = $request->input('update');
+    	$data = $request->input('data');
+    	$data = json_decode($data);
+
+    	$catalog = $this->catalog;
+    	
+    	if ($update === 'update')
+    	{
+    		$catno = $data->catno;
+    		$catalog = $this->find($catno);
+    	}
+
+    	foreach ($data as $name => $value)
+    	{
+    		$catalog->$name = $value;
+    	}
+
+    	$result = (object)[];
+
+    	try
+    	{
+    		$result->save = $catalog->save();
+    	}
+    	catch (\Exception $e)
+    	{
+    		$result->error = $e->getMessage();
+    	}
+
+    	return json_encode($result); 
     }
 }

@@ -124,13 +124,14 @@ $(function ()
 	}
 	function validatorStatus(status)
 	{
+		var button = validator;
 		switch (status)
 		{
 		case 'loading':
-			validator.text('データ保存中').prop('href', '');
+			button.text('データ保存中').prop('href', '');
 			break;
 		case 'ready': 
-			validator.text('更新の確認').prop('href', '/catalog/validator');
+			button.text('更新の確認').prop('href', '/catalog/validator');
 			break;
 		}
 	}

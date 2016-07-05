@@ -39,6 +39,11 @@ $data = json_decode($data);
 	color: #fff;
 	background: #e74c3c;
 }
+#table1 tbody tr.update td:not(.no):not(.status)
+{
+	color: #fff;
+	background: #2980b9;
+}
 </style>
 @endpush
 @section('content')
@@ -48,7 +53,7 @@ $data = json_decode($data);
 <p>
 	<div class="ui buttons">
 		@foreach (range(1, 10) as $no)
-			<a href="" class="ui button" id="button{{ $no }}">
+			<a href="#" class="ui button" id="button{{ $no }}">
 				Button {{ $no }}
 			</a>
 		@endforeach
@@ -108,13 +113,32 @@ $(function ()
 {
 	var table = $('#table1');
 	var reload = $('#button1').text('最新の情報に更新').on('click', checkUpdates);
+	var save = $('#button2');
+	var token = '{{ csrf_token() }}';
+
 	checkUpdates();
+
+	function saveStatus(status)
+	{
+		var button = save;
+		switch (status)
+		{
+		case 'loading': 
+			button.text('更新を確認しています').off('click');
+			break;
+		case 'ready': 
+			button.text('データを更新する').on('click', doUpdates);
+			break;
+		}
+	}
 
 	function checkUpdates()
 	{
 		var thead = table.find('thead');
 		var tbody = table.find('tbody');
 		var rows = tbody.find('tr');
+
+		rows.addClass('checking');
 
 		rows.each(function ()
 		{
@@ -127,10 +151,12 @@ $(function ()
 		var td = tr.find('.status');
 		var data = getDataFromRow(tr);
 
+		saveStatus('checking');
+
 		$.ajax({
 			url: '/catalog/check-update'
 			, method: 'post'
-			, data: { _token: '{{ csrf_token() }}', data: JSON.stringify(data) }
+			, data: { _token: token, data: JSON.stringify(data) }
 		})
 		.done(function (data)
 		{
@@ -144,8 +170,16 @@ $(function ()
 
 			td.text(title);
 			tr.removeClass('insert update').addClass(update);
+
+			tr.removeClass('checking');
+			if (tr.parent().find('.checking').length === 0)
+			{
+				saveStatus('ready');
+			}
 		});
 	}
+	
+
 	function getDataFromRow(tr)
 	{
 		var data = {};
@@ -157,6 +191,62 @@ $(function ()
 			data[name] = value;
 		});
 		return data;
+	}
+
+	function doUpdates()
+	{
+		var rows = table.find('> tbody > tr');
+		rows.addClass('updating');
+		rows.each(function ()
+		{
+			var tr = $(this);
+			doUpdate(tr);
+		});
+	}
+	function doUpdate(tr)
+	{
+		var td = tr.find('.status');
+		var data = getDataFromRow(tr);
+
+		updateStatus(td, 'updating');
+
+		$.ajax({
+			url: '/catalog/do-update'
+			, method: 'post'
+			, data: {
+				_token: token
+				, data: JSON.stringify(data)
+			}
+		})
+		.done(function (data)
+		{
+			updateStatus(td, 'done');
+		})
+		.fail(function (xhr, error, thrown)
+		{
+			updateStatus(td, 'error');
+		})
+		.always(function ()
+		{
+			tr.removeClass('updating');
+			if (tr.parent().find('.updating').length === 0)
+			{
+				alert('');
+			}
+		})
+		;
+	}
+	function updateStatus(td, status)
+	{
+		td.text(status);
+		if (status === 'updating')
+		{
+			td.prepend($('<i>').addClass('fa fa-spinner fa-spin fa-pulse'));
+		}
+		else
+		{
+			td.find('i:first-child').remove();
+		}
 	}
 });
 </script>
