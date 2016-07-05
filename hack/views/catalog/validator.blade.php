@@ -17,9 +17,9 @@ $data = json_decode($data);
 {
 	text-align: center;
 }
-#table1 .nouka, 
-#table1 .baika, 
-#table1 .stanka
+#table1 tbody td.nouka, 
+#table1 tbody td.baika, 
+#table1 tbody td.stanka
 {
 	text-align: right;
 } 
