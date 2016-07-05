@@ -22,6 +22,15 @@ $columns = $catalog->getColumns();
 <p>
 	商品カタログ
 </p>
+<p>
+	<div class="ui buttons">
+		@foreach (range(1, 10) as $no)
+			<a class="ui button" id="button{{ $no }}">
+				Button {{ $no }}
+			</a>
+		@endforeach
+	</div>
+</p>
 <div class="ui left icon input paste" id="paste">
 	<i class="paste icon"></i>
 	<input type="text" placeholder="ここを右クリックして貼り付けをクリック">
@@ -34,6 +43,8 @@ $(function ()
 {
 	var hot = handson($('#handson'));
 	hackPaste($('#paste'), hot);
+
+	var validator = $('#button1');
 
 	function handson(el)
 	{
@@ -101,11 +112,28 @@ $(function ()
 	}
 	function saveData()
 	{
+		validatorStatus('loading');
+
 		var data = hot.getData();
 		var objects = handsonValuesToObjects(data);
-		putSession(JSON.stringify(objects));
+		putSession(JSON.stringify(objects), function ()
+		{
+			validatorStatus('ready');
+		});
 	}
-	function putSession(value)
+	function validatorStatus(status)
+	{
+		switch (status)
+		{
+		case 'loading':
+			validator.text('データ保存中').prop('href', '');
+			break;
+		case 'ready': 
+			validator.text('更新の確認').prop('href', '/catalog/validator');
+			break;
+		}
+	}
+	function putSession(value, callback)
 	{
 		$.ajax({
 			url: '{{ url('/catalog/session') }}'
@@ -117,7 +145,7 @@ $(function ()
 		})
 		.always(function (data, xhr, error, thrown)
 		{
-			//
+			if (typeof callback === 'function') callback();
 		})
 		;
 	}
