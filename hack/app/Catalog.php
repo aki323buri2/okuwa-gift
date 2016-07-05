@@ -45,7 +45,7 @@ class Catalog extends Model
 			'eoscd'  => '100px', 
 			'mekame' => '150px', 
 			'shiren' => '100px', 
-			'hinmei' => '250px', 
+			'hinmei' => '300px', 
 			'sanchi' => '150px', 
 			'tenyou' => '100px', 
 			'nouka'  => '100px', 

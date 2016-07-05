@@ -45,6 +45,7 @@ $(function ()
 	hackPaste($('#paste'), hot);
 
 	var validator = $('#button1');
+	validatorStatus('ready');
 
 	function handson(el)
 	{
