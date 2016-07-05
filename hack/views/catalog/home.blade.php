@@ -169,13 +169,11 @@ $(function ()
 			textarea.remove();
 
 			var selection = JSON.parse(input.data('selection'));
-<<<<<<< HEAD
-			console.log(selection);
-=======
->>>>>>> f7fce111e660381ad8db0438684c01153e6dee2a
+
 			hot.selectCell(selection[0], selection[1]);
 			hot.copyPaste.triggerPaste(null, data);
 		})
+		// soft disabled input..
 		.on('change keydown keypress keyup', function (e)
 		{
 			e.preventDefault();
