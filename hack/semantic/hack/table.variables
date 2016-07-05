@@ -1,0 +1,13 @@
+/*******************************
+             Table
+*******************************/
+/* 
+@cellVerticalPadding: @relativeMini;
+@cellHorizontalPadding: @relativeMini;
+@headerVerticalPadding: @relativeSmall;
+@headerHorizontalPadding: @cellHorizontalPadding;
+ */
+@cellVerticalPadding: .3rem;
+@cellHorizontalPadding: .5rem;
+@headerVerticalPadding: @cellVerticalPadding;
+@headerHorizontalPadding: @cellHorizontalPadding;
