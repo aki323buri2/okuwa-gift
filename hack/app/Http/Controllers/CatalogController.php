@@ -13,9 +13,10 @@ class CatalogController extends Controller
 {
     static public function route()
     {
-        $class = '\\' . __class__;
+    	$class = '\\' . __class__;
     	Route::get('/catalog', $class . '@index');
     	Route::post('/catalog/session', $class . '@session');
+    	Route::get('/catalog/validator', $class . '@validator');
     }
 	
 	protected $catalog;
@@ -27,8 +28,17 @@ class CatalogController extends Controller
 	}
     public function index(Request $request)
     {
+    	return $this->showView('catalog/home', $request);
+    }
+    public function validator(Request $request)
+    {
+    	return $this->showView('catalog/validator', $request);
+    }
+    public function showView($view, Request $request)
+    {
+    	$catalog = $this->catalog;
     	$data = $request->session()->get($this->sessionKey);
-    	return view('catalog/home', ['catalog' => $this->catalog, 'data' => $data]);
+    	return view($view, ['catalog' => $catalog, 'data' => $data]);
     }
     public function session(Request $request)
     {
