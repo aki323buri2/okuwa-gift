@@ -175,6 +175,9 @@ $(function ()
 		table.loadData(selected);
 		table.search.query(query);
 		table.render();
+
+		var text = selected.length + ' / ' + full.length + ' 件を表示';
+		monitor.text(text);
 	}
 
 	function showValidator(e)
