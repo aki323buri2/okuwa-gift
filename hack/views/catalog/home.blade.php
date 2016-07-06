@@ -39,6 +39,10 @@ $links_more = array_merge((array)@$links_more, [
 {
 	width: 30rem;
 }
+#monitor
+{
+	width: 15rem;
+}
 #search > input:first-child
 {
 	border-radius: 1rem;
@@ -46,7 +50,11 @@ $links_more = array_merge((array)@$links_more, [
 }
 #search > input:first-child + i.icon
 {
-	right: .5rem;
+	right: 2.5rem;
+}
+#button1
+{
+	margin-right: 0;
 }
 @foreach ($columns as $name => $column)
 	#table1 .{{ $name }} { width: {{ $column->width }}; }
@@ -62,11 +70,21 @@ $links_more = array_merge((array)@$links_more, [
 <p>
 	商品カタログ
 
-	<div class="ui icon input" id="search">
-		<input type="text" placeholder="商品カタログ検索">
-		<i class="search link icon"></i>
+	<div class="ui form">
+		<div class="inline fields">
+			<div class="ui icon input field" id="search">
+				<input type="text" placeholder="商品カタログ検索">
+				<i class="search link icon"></i>
+			</div>
+			<div class="field" id="monitor">monitor..</div>
+			
+			<div class="ui buttons field">
+				@foreach (range(1, 10) as $no)
+					<div class="ui button" id="button{{ $no }}">Button {{ $no }}</div>
+				@endforeach
+			</div>
+		</div>
 	</div>
-	<div id="monitor"></div>
 </p>
 <div id="table1"></div>
 @endsection
