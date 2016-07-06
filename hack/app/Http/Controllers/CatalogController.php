@@ -33,6 +33,7 @@ class CatalogController extends Controller
     {
     	$catalog = $this->catalog;
     	$cache = $request->session()->get($this->sessionKey);
+
     	return view($view, ['catalog' => $catalog, 'cache' => $cache]);
     }
     public function session(Request $request)

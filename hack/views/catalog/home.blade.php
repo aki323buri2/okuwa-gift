@@ -99,9 +99,12 @@ $(function ()
 	button.on('click', doSearch);
 
 	var full = getFullData();
+	var selected = [];//検索結果
 	var sel2full = [];//関係表
 	var table = handson($('#table1'));
 	search.trigger('input');
+
+	var validator = $('#button1').text('更新の確認').on('click', showValidator);
 
 	function handson(el)
 	{
@@ -146,7 +149,7 @@ $(function ()
 	function doSearch(e)
 	{
 		var query = search.val().trim();
-		var selected = [];
+		selected = [];//検索結果リストのリセット
 		sel2full = [];//関係表リセット
 		if (query.length === 0)
 		{
@@ -172,7 +175,20 @@ $(function ()
 		table.loadData(selected);
 		table.search.query(query);
 		table.render();
-		
+	}
+
+	function showValidator(e)
+	{
+		$.ajax({
+			url: '/catalog/session'
+			, method: 'post'
+			, data: { value: JSON.stringify(selected) }
+		})
+		.done(function (data)
+		{
+			location.href = '/catalog/validator';
+		})
+		;
 	}
 });
 </script>
