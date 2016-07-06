@@ -6,6 +6,8 @@ $links_more = array_merge((array)@$links_more, [
 	'/vendor/handsontable/dist/handsontable.full.js', 
 ]);
 $columns = $catalog->getColumns();
+
+$data = $catalog->all();
 ?>
 @push('styles')
 <style>

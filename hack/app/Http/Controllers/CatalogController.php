@@ -31,8 +31,8 @@ class CatalogController extends Controller
     public function showView($view, Request $request)
     {
     	$catalog = $this->catalog;
-    	$data = $request->session()->get($this->sessionKey);
-    	return view($view, ['catalog' => $catalog, 'data' => $data]);
+    	$cache = $request->session()->get($this->sessionKey);
+    	return view($view, ['catalog' => $catalog, 'cache' => $cache]);
     }
     public function session(Request $request)
     {
@@ -60,6 +60,8 @@ class CatalogController extends Controller
     	$find = $catalog->find($catno);
 
     	$update = $find ? 'update' : 'insert';
+
+
 
     	$result = (object)[];
     	$result->update = $update;

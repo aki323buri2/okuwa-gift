@@ -2,6 +2,7 @@
 @section('title', '商品カタログ - 更新の確認')
 <?php
 $columns = $catalog->getColumns();
+$data = $cache;
 $data = json_decode($data);
 ?>
 @push('styles')
@@ -201,10 +202,10 @@ $(function ()
 		rows.each(function ()
 		{
 			var tr = $(this);
-			doUpdate(tr);
+			doUpdate(tr, onUpdatesFinished);
 		});
 	}
-	function doUpdate(tr)
+	function doUpdate(tr, onUpdatesFinished)
 	{
 		var td = tr.find('.status');
 		var data = getDataFromRow(tr);
@@ -231,10 +232,13 @@ $(function ()
 			tr.removeClass('updating');
 			if (tr.parent().find('.updating').length === 0)
 			{
-				alert('');
+				onUpdatesFinished();
 			}
 		})
 		;
+	}
+	function onUpdatesFinished()
+	{
 	}
 	function updateStatus(td, status)
 	{
