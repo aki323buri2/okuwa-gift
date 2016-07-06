@@ -18,7 +18,8 @@ class CatalogController extends Controller
     	Route::post('/catalog/session', $class . '@session');
     	Route::get ('/catalog/validator', $class . '@validator');
     	Route::post('/catalog/check-update', $class . '@checkUpdate');
-    	Route::post('/catalog/do-update', $class . '@doUpdate');
+        Route::post('/catalog/do-update', $class . '@doUpdate');
+    	Route::get ('/catalog/search', $class . '@search');
     }
 	
 	protected $catalog;
@@ -98,5 +99,13 @@ class CatalogController extends Controller
     	}
 
     	return json_encode($result); 
+    }
+
+    public function search(Request $request)
+    {
+        $catalog = $this->catalog;
+        $search = $request->input('search');
+
+        return $search;
     }
 }
