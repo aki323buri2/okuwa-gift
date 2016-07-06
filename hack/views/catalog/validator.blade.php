@@ -114,7 +114,6 @@ $(function ()
 	var table = $('#table1');
 	var reload = $('#button1').text('最新の情報に更新').on('click', checkUpdates);
 	var save = $('#button2');
-	var token = '{{ csrf_token() }}';
 
 	checkUpdates();
 
@@ -156,7 +155,9 @@ $(function ()
 		$.ajax({
 			url: '/catalog/check-update'
 			, method: 'post'
-			, data: { _token: token, data: JSON.stringify(data) }
+			, data: {
+				data: JSON.stringify(data)
+			}
 		})
 		.done(function (data)
 		{
@@ -214,8 +215,7 @@ $(function ()
 			url: '/catalog/do-update'
 			, method: 'post'
 			, data: {
-				_token: token
-				, data: JSON.stringify(data)
+				data: JSON.stringify(data)
 			}
 		})
 		.done(function (data)

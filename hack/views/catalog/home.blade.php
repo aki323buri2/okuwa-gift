@@ -141,8 +141,7 @@ $(function ()
 			url: '{{ url('/catalog/session') }}'
 			, method: 'post'
 			, data: {
-				_token: '{{ csrf_token() }}'
-				, value: value
+				value: value
 			}
 		})
 		.always(function (data, xhr, error, thrown)
