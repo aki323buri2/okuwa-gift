@@ -182,10 +182,27 @@ $(function ()
 
 	function showValidator(e)
 	{
+		var props = [];
+		var count = table.countCols();
+		for (var i = 0; i < count; i++) props.push(table.colToProp(i));
+		
+		var data = table.getData();
+		var objects = [];
+		$.each(data, function (index, row)
+		{
+			var object = {};
+			$.each(props, function (index, name)
+			{
+				object[name] = row[index];
+			});
+			objects.push(object);
+		});
+		console.log(objects);
+
 		$.ajax({
 			url: '/catalog/session'
 			, method: 'post'
-			, data: { value: JSON.stringify(selected) }
+			, data: { value: JSON.stringify(objects) }
 		})
 		.done(function (data)
 		{
