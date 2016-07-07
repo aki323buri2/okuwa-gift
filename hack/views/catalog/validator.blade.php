@@ -123,7 +123,7 @@ $(function ()
 		var button = save;
 		switch (status)
 		{
-		case 'loading': 
+		case 'checking': 
 			button.text('更新を確認しています').off('click');
 			break;
 		case 'ready': 
