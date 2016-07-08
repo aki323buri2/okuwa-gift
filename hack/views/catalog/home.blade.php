@@ -2,65 +2,66 @@
 @section('title', '商品カタログ')
 <?php
 $columns = $catalog->getColumns();
-$data = $catalog->all();
-
-$todo = [
-	['created_at', '150px', '登録時刻', 'text', true], 
-	['updated_at', '150px', '修正時刻', 'text', true], 
+$values = [
+	['created_at', '150px', '登録日時'], 
+	['updated_at', '150px', '修正日時'], 
 ];
 $names = [
 	'name', 
 	'width', 
 	'title', 
-	'hot', 
-	'readOnly', 
 ];
-foreach ($todo as $values)
+$objects = array_map(function ($values) use ($names) 
 {
-	$object = (object)array_combine($names, $values);
-	$columns[$object->name] = $object;
-}
-$links_more = array_merge((array)@$links_more, [
-	'/vendor/handsontable/dist/handsontable.full.css', 
-	'/vendor/handsontable/dist/handsontable.full.js', 
-]);
+	return (object)array_combine($names, $values);
+}, $values);
+$objects = collect($objects)->keyBy('name');
+$columns = $columns->merge($objects);
 ?>
 @push('styles')
 <style>
-#topbar
-{
-	margin-bottom: 1rem;
-}
 #content
 {
-	margin-left: 2rem;
-}
-#search
-{
-	width: 30rem;
-}
-#monitor
-{
-	width: 15rem;
+	margin: 1rem;
 }
 #search > input:first-child
 {
-	border-radius: 1rem;
 	padding: .5rem 1rem;
+	border-radius: 1rem;
+	width: 25rem;
 }
-#search > input:first-child + i.icon
+#search > input:first-child ~ i.remove.icon
 {
-	right: 2.5rem;
+	right: 2rem;
 }
-#button1
+#search > input:first-child ~ i.search.icon
 {
-	margin-right: 0;
+	right: .5rem;
+}
+#table1
+{
+	width: auto;
+}
+#table thead th.no
+{
+	width: 40px;
 }
 @foreach ($columns as $name => $column)
-	#table1 .{{ $name }} { width: {{ $column->width }}; }
+	#table1 thead th.{{ $name }} { width: {{ $column->width }}; }
 @endforeach
-#table1 td.created_at, 
-#table1 td.updated_at
+#table1 thead th, 
+#table1 tbody .no
+{
+	text-align: center;
+}
+#table1 tbody .nouka, 
+#table1 tbody .baika, 
+#table1 tbody .stanka
+{
+	text-align: right;
+}
+#table1 tbody .created_at, 
+#table1 tbody .updated_at
 {
 	text-align: center;
 }
@@ -69,146 +70,106 @@ $links_more = array_merge((array)@$links_more, [
 @section('content')
 <p>
 	商品カタログ
-
-	<div class="ui form">
-		<div class="inline fields">
-			<div class="ui icon input field" id="search">
-				<input type="text" placeholder="商品カタログ検索">
-				<i class="search link icon"></i>
-			</div>
-			<div class="field" id="monitor">monitor..</div>
-			
-			<div class="ui buttons field">
-				@foreach (range(1, 10) as $no)
-					<div class="ui button" id="button{{ $no }}">Button {{ $no }}</div>
-				@endforeach
-			</div>
-		</div>
+	<div class="ui icon input search" id="search">
+		<input type="text" placeholder="商品カタログを検索">
+		<i class="remove link icon"></i>
+		<i class="search link icon"></i>
 	</div>
 </p>
-<div id="table1"></div>
+<table class="ui celled fixed table" id="table1">
+	<thead>
+		<tr>
+			<th class="no">No.</th>
+			@foreach ($columns as $name => $column)
+				<th
+					class="{{ $name }}"
+					data-name="{{ $column->name }}"
+					data-title="{{ $column->title }}"
+				>
+					{{ $column->title }}
+				</th>
+			@endforeach
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
 @endsection
 @push('scripts')
 <script>
 $(function ()
 {
-	var search = $('#search > input:first-child');
-	var monitor = $('#monitor');
-	var button = search.find(' + i.icon');
-	search.on('input change', doSearch);
-	button.on('click', doSearch);
-
+	var table = $('#table1');
 	var full = getFullData();
-	var selected = [];//検索結果
-	var sel2full = [];//関係表
-	var table = handson($('#table1'));
-	search.trigger('input');
 
-	var validator = $('#button1').text('更新の確認').on('click', showValidator);
+	var search = $('#search input:first-child');
+	search.find('~ .remove.icon').on('click', resetSearch);
+	search.find('~ .search.icon').on('click', doSearch);
 
-	function handson(el)
+	doSearch();
+	
+	function resetSearch()
 	{
-		table = el.handsontable({
-			columns: handsonColumns()
-			, rowHeaders: true
-			, search: true
-		});
-		return table.handsontable('getInstance');
+		var input = search;
+		input.val('').select();
+		doSearch();
 	}
-	function handsonColumns()
+	function doSearch()
 	{
-		var columns = [];
-		@foreach ($columns as $name => $column)
-			(function ()
-			{
-				var column = {};
-				column.title = '{{ $column->title }}';
-				column.data = '{{ $column->name }}';
-				column.type = '{{ $column->hot }}';
-				column.className = '{{ $column->name }}';
-				column.readOnly = {{ @$column->readOnly ? 'true' : 'false' }};
-				columns.push(column);
-			})();
-		@endforeach
-		return columns;
+		var input = search;
+		var text = input.val().trim();
+		var selected = selectData(full, text);
+		displayData(table, selected);
 	}
-	function getFullData()
+	function displayData(table, data)
 	{
-		var data = [];
-		@foreach ($data as $row)
-			(function () {
-				var object = {};
-				@foreach ($columns as $name => $column)
-					object['{{ $name }}'] = '{{ $row->$name }}';
-				@endforeach
-				data.push(object);
-			})();
-		@endforeach
-		return data;
-	}
-	function doSearch(e)
-	{
-		var query = search.val().trim();
-		selected = [];//検索結果リストのリセット
-		sel2full = [];//関係表リセット
-		if (query.length === 0)
-		{
-			selected = full;
-		}
-		else
-		{
-			selected = $.grep(full, function (row, i)
-			{
-				for (col in row)
-				{
-					var value = row[col];
-					if (value && value.indexOf(query) >= 0)
-					{
-						sel2full.push(i);//関係表エントリ
-						return true;
-					}
-				}
-				return false;
-			});						
-		}
-		if (selected.length === 0) selected = [[]];
-		table.loadData(selected);
-		table.search.query(query);
-		table.render();
-
-		var text = selected.length + ' / ' + full.length + ' 件を表示';
-		monitor.text(text);
-	}
-
-	function showValidator(e)
-	{
-		var props = [];
-		var count = table.countCols();
-		for (var i = 0; i < count; i++) props.push(table.colToProp(i));
-		
-		var data = table.getData();
-		var objects = [];
+		var tbody = table.find('tbody').empty();
+		var no = 0;
 		$.each(data, function (index, row)
 		{
-			var object = {};
-			$.each(props, function (index, name)
+			var tr = $('<tr>').appendTo(tbody);
+			var td = $('<td>').appendTo(tr).addClass('no').text(++no);
+			$.each(row, function (name, value)
 			{
-				object[name] = row[index];
+				var td = $('<td>').appendTo(tr);
+				td.addClass(name);
+				td.text(value);
 			});
-			objects.push(object);
 		});
-		console.log(objects);
-
-		$.ajax({
-			url: '/catalog/session'
-			, method: 'post'
-			, data: { value: JSON.stringify(objects) }
-		})
-		.done(function (data)
+	}
+	function selectData(full, text)
+	{
+		if (text === '') return full;
+		var selected = $.grep(full, function (row, index)
 		{
-			location.href = '/catalog/validator';
-		})
-		;
+			var hit = false;
+			$.each(row, function(name, value)
+			{
+				if (value && value.indexOf(text) >= 0)
+				{
+					hit = true;
+				}
+			});
+			return hit;
+		});
+		return selected;
+	}
+
+	function getFullData()
+	{
+		var objects = [];
+		@foreach ($catalog->all() as $row)
+			(function ()
+			{
+				var object = {};
+				@foreach ($columns as $name => $column)
+					<?php $value = $row->$name?>
+					object.{{ $name }} = '{{ $value }}';
+				@endforeach
+				objects.push(object);
+			})();
+		@endforeach
+		return objects;
 	}
 });
 </script>

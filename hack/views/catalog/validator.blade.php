@@ -45,6 +45,7 @@ $data = json_decode($data);
 	color: #fff;
 	background: #2980b9;
 }
+
 </style>
 @endpush
 @section('content')
@@ -118,6 +119,8 @@ $(function ()
 
 	checkUpdates();
 
+	selectRowBehavior(table);
+
 	function saveStatus(status)
 	{
 		var button = save;
@@ -172,6 +175,7 @@ $(function ()
 
 			td.text(title);
 			tr.removeClass('insert update').addClass(update);
+			tr.data('update', update);
 
 			tr.removeClass('checking');
 			if (tr.parent().find('.checking').length === 0)
@@ -208,6 +212,7 @@ $(function ()
 	function doUpdate(tr, onUpdatesFinished)
 	{
 		var td = tr.find('.status');
+		var update = tr.data('update');
 		var data = getDataFromRow(tr);
 
 		updateStatus(td, 'updating');
@@ -216,7 +221,8 @@ $(function ()
 			url: '/catalog/do-update'
 			, method: 'post'
 			, data: {
-				data: JSON.stringify(data)
+				update: update
+				, data: JSON.stringify(data)
 			}
 		})
 		.done(function (data)
@@ -251,6 +257,12 @@ $(function ()
 		{
 			td.find('i:first-child').remove();
 		}
+	}
+
+	function selectRowBehavior(table)
+	{
+		
+
 	}
 });
 </script>

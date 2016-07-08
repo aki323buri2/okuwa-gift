@@ -1,214 +1,212 @@
-@extends('layouts/sidebar')
+@extends('layouts/topbar')
 @section('title', '商品カタログ')
 <?php
+$columns = $catalog->getColumns();
+$data = $catalog->all();
+
+$todo = [
+	['created_at', '150px', '登録時刻', 'text', true], 
+	['updated_at', '150px', '修正時刻', 'text', true], 
+];
+$names = [
+	'name', 
+	'width', 
+	'title', 
+	'hot', 
+	'readOnly', 
+];
+foreach ($todo as $values)
+{
+	$object = (object)array_combine($names, $values);
+	$columns[$object->name] = $object;
+}
 $links_more = array_merge((array)@$links_more, [
 	'/vendor/handsontable/dist/handsontable.full.css', 
 	'/vendor/handsontable/dist/handsontable.full.js', 
 ]);
-$columns = $catalog->getColumns();
-
-$data = $catalog->all();
 ?>
 @push('styles')
 <style>
-#paste
+#topbar
 {
-	width: 25rem;
+	margin-bottom: 1rem;
+}
+#content
+{
+	margin-left: 2rem;
+}
+#search
+{
+	width: 30rem;
+}
+#monitor
+{
+	width: 15rem;
+}
+#search > input:first-child
+{
+	border-radius: 1rem;
+	padding: .5rem 1rem;
+}
+#search > input:first-child + i.icon
+{
+	right: 2.5rem;
+}
+#button1
+{
+	margin-right: 0;
 }
 @foreach ($columns as $name => $column)
-	#handson .{{ $name }} { width: {{ $column->width }}; }
+	#table1 .{{ $name }} { width: {{ $column->width }}; }
 @endforeach
+#table1 td.created_at, 
+#table1 td.updated_at
+{
+	text-align: center;
+}
 </style>
 @endpush
 @section('content')
 <p>
 	商品カタログ
-</p>
-<p>
-	<div class="ui buttons">
-		@foreach (range(1, 10) as $no)
-			<a class="ui button" id="button{{ $no }}">
-				Button {{ $no }}
-			</a>
-		@endforeach
+
+	<div class="ui form">
+		<div class="inline fields">
+			<div class="ui icon input field" id="search">
+				<input type="text" placeholder="商品カタログ検索">
+				<i class="search link icon"></i>
+			</div>
+			<div class="field" id="monitor">monitor..</div>
+			
+			<div class="ui buttons field">
+				@foreach (range(1, 10) as $no)
+					<div class="ui button" id="button{{ $no }}">Button {{ $no }}</div>
+				@endforeach
+			</div>
+		</div>
 	</div>
 </p>
-<div class="ui left icon input paste" id="paste">
-	<i class="paste icon"></i>
-	<input type="text" placeholder="ここを右クリックして貼り付けをクリック">
-</div>
-<div id="handson"></div>
+<div id="table1"></div>
 @endsection
 @push('scripts')
 <script>
 $(function ()
 {
-	var hot = handson($('#handson'));
-	hackPaste($('#paste'), hot);
+	var search = $('#search > input:first-child');
+	var monitor = $('#monitor');
+	var button = search.find(' + i.icon');
+	search.on('input change', doSearch);
+	button.on('click', doSearch);
 
-	var validator = $('#button1');
-	validatorStatus('ready');
+	var full = getFullData();
+	var selected = [];//検索結果
+	var sel2full = [];//関係表
+	var table = handson($('#table1'));
+	search.trigger('input');
+
+	var validator = $('#button1').text('更新の確認').on('click', showValidator);
 
 	function handson(el)
 	{
-		var hot = el.handsontable({
+		table = el.handsontable({
 			columns: handsonColumns()
-			, data: handsonData()
 			, rowHeaders: true
-			, afterChange: handsonAfterChange
-			, afterRemoveRow: handsonAfterRemoveRow
-			, afterRemoveCol: handsonAfterRemoveCol
-			, contextMenu: true
+			, search: true
 		});
-		return hot.handsontable('getInstance');
+		return table.handsontable('getInstance');
 	}
-
-
 	function handsonColumns()
 	{
 		var columns = [];
 		@foreach ($columns as $name => $column)
 			(function ()
 			{
-				var object = {};
-				object.data = '{{ $name }}';
-				object.title = '{{ $column->title }}';
-				object.type = '{{ $column->hot }}';
-				object.className = '{{ $column->name }}';
-				columns.push(object);
+				var column = {};
+				column.title = '{{ $column->title }}';
+				column.data = '{{ $column->name }}';
+				column.type = '{{ $column->hot }}';
+				column.className = '{{ $column->name }}';
+				column.readOnly = {{ @$column->readOnly ? 'true' : 'false' }};
+				columns.push(column);
 			})();
-		@endforeach 
+		@endforeach
 		return columns;
 	}
-	function handsonData()
+	function getFullData()
 	{
-		@if ($data === null)
-			return [[]];
-		@else
-			<?php $data = json_decode($data)?>
-			var objects = [];
-			@foreach ($data as $row)
-				(function ()
-				{
-					var object = {};
-					@foreach ($row as $name => $value)
-						object['{{ $name }}'] = '{{ $value }}';
-					@endforeach
-					objects.push(object);
-				})();
-			@endforeach
-			return objects;
-		@endif
+		var data = [];
+		@foreach ($data as $row)
+			(function () {
+				var object = {};
+				@foreach ($columns as $name => $column)
+					object['{{ $name }}'] = '{{ $row->$name }}';
+				@endforeach
+				data.push(object);
+			})();
+		@endforeach
+		return data;
 	}
-	function handsonAfterChange(changes, source)
+	function doSearch(e)
 	{
-		if (source === 'loadData') return;
-		saveData();
-	}
-	function handsonAfterRemoveRow(index, amount)
-	{
-		saveData();
-	}
-	function handsonAfterRemoveCol(index, amount)
-	{
-		saveData();
-	}
-	function saveData()
-	{
-		validatorStatus('loading');
-
-		var data = hot.getData();
-		var objects = handsonValuesToObjects(data);
-		putSession(JSON.stringify(objects), function ()
+		var query = search.val().trim();
+		selected = [];//検索結果リストのリセット
+		sel2full = [];//関係表リセット
+		if (query.length === 0)
 		{
-			validatorStatus('ready');
-		});
-	}
-	function validatorStatus(status)
-	{
-		var button = validator;
-		switch (status)
-		{
-		case 'loading':
-			button.text('データ保存中').prop('href', '');
-			break;
-		case 'ready': 
-			button.text('更新の確認').prop('href', '/catalog/validator');
-			break;
+			selected = full;
 		}
-	}
-	function putSession(value, callback)
-	{
-		$.ajax({
-			url: '{{ url('/catalog/session') }}'
-			, method: 'post'
-			, data: {
-				value: value
-			}
-		})
-		.always(function (data, xhr, error, thrown)
+		else
 		{
-			if (typeof callback === 'function') callback();
-		})
-		;
+			selected = $.grep(full, function (row, i)
+			{
+				for (col in row)
+				{
+					var value = row[col];
+					if (value && value.indexOf(query) >= 0)
+					{
+						sel2full.push(i);//関係表エントリ
+						return true;
+					}
+				}
+				return false;
+			});						
+		}
+		if (selected.length === 0) selected = [[]];
+		table.loadData(selected);
+		table.search.query(query);
+		table.render();
+
+		var text = selected.length + ' / ' + full.length + ' 件を表示';
+		monitor.text(text);
 	}
-	function handsonValuesToObjects(data)
+
+	function showValidator(e)
 	{
+		var props = [];
+		var count = table.countCols();
+		for (var i = 0; i < count; i++) props.push(table.colToProp(i));
+		
+		var data = table.getData();
 		var objects = [];
-		$.each(data, function (index, values)
+		$.each(data, function (index, row)
 		{
 			var object = {};
-			var i = 0;
-			@foreach ($columns as $name => $column)
-				object['{{ $name }}'] = values[i++];
-			@endforeach 
+			$.each(props, function (index, name)
+			{
+				object[name] = row[index];
+			});
 			objects.push(object);
 		});
-		return objects;
-	}
-	function hackPaste(input, hot)
-	{
-		//handsontableのセル選択情報をinputにメモる
-		//（handsontableで選択中のセル位置情報を取得するメソッドが見つからない・・・）
-		input.data('selection', JSON.stringify([0, 0, 0, 0]));
-		hot.updateSettings({
-			afterSelection: function (r, c, r2, c2)
-			{
-				input.data('selection', JSON.stringify([r, c, r2, c2]));
-			}
-		});
-		input.on('paste', function (e)
-		{
-			e.preventDefault();
-			e.stopPropagation();
-			var clipboardData = e.clipboardData || e.originalEvent.clipboardData;
-			var format = 'text/plain';
-			if (clipboardData === undefined)
-			{
-				//IE..
-				clipboardData = window.clipboardData;
-				format = 'text';
-			}
-			var data = clipboardData.getData(format);
-			
-			//行末の改行コードを取り除くため、テキストエリアを踏み台にする
-			var textarea = $('<textarea>')
-				.appendTo('body')
-				.val(data)
-			;
-			var data = textarea.val();
-			textarea.remove();
+		console.log(objects);
 
-			var selection = JSON.parse(input.data('selection'));
-
-			hot.selectCell(selection[0], selection[1]);
-			hot.copyPaste.triggerPaste(null, data);
+		$.ajax({
+			url: '/catalog/session'
+			, method: 'post'
+			, data: { value: JSON.stringify(objects) }
 		})
-		// soft disabled input..
-		.on('change keydown keypress keyup', function (e)
+		.done(function (data)
 		{
-			e.preventDefault();
-			e.stopPropagation();
+			location.href = '/catalog/validator';
 		})
 		;
 	}

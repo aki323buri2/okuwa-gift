@@ -80,7 +80,7 @@ class CatalogController extends Controller
     	if ($update === 'update')
     	{
     		$catno = $data->catno;
-    		$catalog = $this->find($catno);
+    		$catalog = $catalog->find($catno);
     	}
 
     	foreach ($data as $name => $value)
@@ -89,6 +89,8 @@ class CatalogController extends Controller
     	}
 
     	$result = (object)[];
+
+        $result->update = $update;
 
     	try
     	{
