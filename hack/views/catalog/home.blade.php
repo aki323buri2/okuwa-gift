@@ -65,10 +65,7 @@ $columns = $columns->merge($objects);
 {
 	text-align: center;
 }
-#table1 tbody .ui-selectee.ui-selected
-{
-	background: #ccc;
-}
+
 </style>
 @endpush
 @section('content')
@@ -162,13 +159,6 @@ $(function ()
 		});
 		return selected;
 	}
-	function makeUpTable(table)
-	{
-		var tbody = table.find('tbody');
-		tbody.selectable({
-			filter: 'tr'
-		});
-	}
 
 	function getFullData()
 	{
@@ -188,4 +178,97 @@ $(function ()
 	}
 });
 </script>
+@endpush
+@push('scripts')
+@endpush
+<script>
+/*===================================
+ *     for jquery ui selectable 
+ *===================================*/
+function makeUpTable(table)
+{
+	var thead = table.find('thead');
+	var tbody = table.find('tbody');
+
+	var prev = -1;//Shiftキー押しながら機能を実現するため
+	var cnSelected = 'ui-selected';
+	//「まとめて選択」ボタン
+	var toggle = thead.find('th:first-child');
+
+	tbody.selectable({
+		filter: 'tr'
+		, selecting: function (e, ui)
+		{
+			var all = $(ui.selecting.tagName, e.target);
+			var sel = $(ui.selecting);
+			var index = all.index(sel);
+			if (e.shiftKey && prev > -1)
+			{
+				// console.log(prev, index, Math.min(prev, index));
+				all.slice(Math.min(prev, index), 1 + Math.max(prev, index)).addClass(cnSelected);
+			}
+			else
+			{
+				prev = index;
+			}	
+			checkSelected(toggle);
+		}
+		, unselecting: function(e, ui)
+		{
+			checkSelected(toggle);
+		}
+		, stop: function (e, ui)
+		{
+			checkSelected(toggle);
+		}
+	});
+
+	//「まとめて選択」ボタンを更新
+	function checkSelected(toggle)
+	{
+		if (tbody.find('tr:not(.' + cnSelected + ')').length === 0)
+		{
+			toggle.addClass(cnSelected);
+		}
+		else
+		{
+			toggle.removeClass(cnSelected);
+		}
+	}
+
+	toggle.addClass('ui-selectee').on('click', function (e)
+	{
+		e.preventDefault();
+		e.stopPropagation();
+
+		var me = $(this).toggleClass(cnSelected);
+		
+		var all = tbody.find('tr');
+		
+		if (me.hasClass(cnSelected))
+		{
+			all.addClass(cnSelected);
+		}
+		else
+		{
+			all.removeClass(cnSelected);
+		}	
+	});
+}
+</script>
+@push('styles')
+<style>
+/* =================================
+ *     for jquery ui selectable
+ * ================================= */
+#table1 thead th:first-child
+{
+	cursor: pointer;
+}
+#table1 .ui-selectee.ui-selecting, 
+#table1 .ui-selectee.ui-selected
+{
+	background: #ccc;
+}
+</style>
 @endpush
