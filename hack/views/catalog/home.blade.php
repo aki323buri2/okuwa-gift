@@ -38,6 +38,18 @@ $columns = $columns->merge($objects);
 {
 	right: .5rem;
 }
+
+#monitor
+{
+	margin-left: 1rem;
+	display: inline-block;
+	width: 25rem;
+}
+
+#buttons
+{
+}
+
 #table1
 {
 	width: auto;
@@ -76,7 +88,17 @@ $columns = $columns->merge($objects);
 		<i class="remove link icon"></i>
 		<i class="search link icon"></i>
 	</div>
+	<span id="monitor">monitor..</span>
 </p>
+
+<div class="ui secondary menu">
+	@foreach (range(1, 10) as $no)
+		<a href="#" class="item" id="toolmenu{{ $no }}">
+			Tool menu {{ $no }}
+		</a>
+	@endforeach
+</div>
+
 <table class="ui celled fixed table" id="table1">
 	<thead>
 		<tr>
@@ -182,78 +204,42 @@ $(function ()
 @push('scripts')
 @endpush
 <script>
-/*===================================
- *     for jquery ui selectable 
- *===================================*/
 function makeUpTable(table)
 {
-	var thead = table.find('thead');
-	var tbody = table.find('tbody');
+	var selectable = table.find('tbody');
+	var toggle = $('#toolmenu1');
 
-	var prev = -1;//Shiftキー押しながら機能を実現するため
-	var cnSelected = 'ui-selected';
-	//「まとめて選択」ボタン
-	var toggle = thead.find('th:first-child');
-
-	tbody.selectable({
-		filter: 'tr'
-		, selecting: function (e, ui)
-		{
-			var all = $(ui.selecting.tagName, e.target);
-			var sel = $(ui.selecting);
-			var index = all.index(sel);
-			if (e.shiftKey && prev > -1)
-			{
-				// console.log(prev, index, Math.min(prev, index));
-				all.slice(Math.min(prev, index), 1 + Math.max(prev, index)).addClass(cnSelected);
-			}
-			else
-			{
-				prev = index;
-			}	
-			checkSelected(toggle);
-		}
-		, unselecting: function(e, ui)
-		{
-			checkSelected(toggle);
-		}
-		, stop: function (e, ui)
-		{
-			checkSelected(toggle);
-		}
-	});
-
-	//「まとめて選択」ボタンを更新
-	function checkSelected(toggle)
+	toggle.on('click', toggleSelectable);
+	toggleSelectable.apply(toggle);
+	
+	var uiSelectable = 'ui-selectable';
+	var uiSelected = 'ui-selected';
+	
+	function toggleSelectable()
 	{
-		if (tbody.find('tr:not(.' + cnSelected + ')').length === 0)
+		var me = $(this);
+		var cn = 'ui-selectable-off';
+		me.toggleClass(cn);
+		var off = me.hasClass(cn);
+		me.text('行選択 : ' + (off ? 'オフ' : 'オン'));
+		if (off)
 		{
-			toggle.addClass(cnSelected);
+			if (selectable.hasClass(uiSelectable))
+			{
+				selectable.selectable('destroy');
+			}
 		}
 		else
 		{
-			toggle.removeClass(cnSelected);
+			initSelectable(selectable);
 		}
 	}
-
-	toggle.addClass('ui-selectee').on('click', function (e)
+	function initSelectable(selectable)
 	{
-		e.preventDefault();
-		e.stopPropagation();
-
-		var me = $(this).toggleClass(cnSelected);
-		
-		var all = tbody.find('tr');
-		
-		if (me.hasClass(cnSelected))
-		{
-			all.addClass(cnSelected);
-		}
-		else
-		{
-			all.removeClass(cnSelected);
-		}	
-	});
+		selectable.selectable({
+			filter: 'tr'
+		});
+	}
 }
 </script>
 @push('styles')
@@ -265,8 +251,13 @@ function makeUpTable(table)
 {
 	cursor: pointer;
 }
-#table1 .ui-selectee.ui-selecting, 
-#table1 .ui-selectee.ui-selected
+#table1 .ui-selectable .ui-selectee
+{
+	background: #eee;
+	cursor: pointer;
+}
+#table1 .ui-selectable .ui-selectee.ui-selecting, 
+#table1 .ui-selectable .ui-selectee.ui-selected
 {
 	background: #ccc;
 }
