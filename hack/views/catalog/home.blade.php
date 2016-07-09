@@ -28,11 +28,11 @@ $columns = $columns->merge($objects);
 {
 	padding: .5rem 1rem;
 	border-radius: 1rem;
-	width: 25rem;
+	width: 30rem;
 }
 #search > input:first-child ~ i.remove.icon
 {
-	right: 2rem;
+	right: 2.5rem;
 }
 #search > input:first-child ~ i.search.icon
 {
@@ -64,6 +64,10 @@ $columns = $columns->merge($objects);
 #table1 tbody .updated_at
 {
 	text-align: center;
+}
+#table1 tbody .ui-selectee.ui-selected
+{
+	background: #ccc;
 }
 </style>
 @endpush
@@ -111,7 +115,9 @@ $(function ()
 	function resetSearch()
 	{
 		var input = search;
+		var empty = input.val().trim() === '';
 		input.val('').select();
+		if (empty) return;
 		doSearch();
 	}
 	function doSearch()
@@ -136,6 +142,8 @@ $(function ()
 				td.text(value);
 			});
 		});
+
+		makeUpTable(table);//****************************
 	}
 	function selectData(full, text)
 	{
@@ -153,6 +161,13 @@ $(function ()
 			return hit;
 		});
 		return selected;
+	}
+	function makeUpTable(table)
+	{
+		var tbody = table.find('tbody');
+		tbody.selectable({
+			filter: 'tr'
+		});
 	}
 
 	function getFullData()
