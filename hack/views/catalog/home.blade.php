@@ -206,14 +206,16 @@ $(function ()
 <script>
 function makeUpTable(table)
 {
+	// elements
 	var selectable = table.find('tbody');
 	var toggle = $('#toolmenu1');
+	// class names
+	var uiSelectable = 'ui-selectable';
+	var uiSelected = 'ui-selected';
 
 	toggle.on('click', toggleSelectable);
 	toggleSelectable.apply(toggle);
 	
-	var uiSelectable = 'ui-selectable';
-	var uiSelected = 'ui-selected';
 	
 	function toggleSelectable()
 	{
@@ -231,13 +233,44 @@ function makeUpTable(table)
 		}
 		else
 		{
-			initSelectable(selectable);
+			createSelectable(selectable);
 		}
 	}
-	function initSelectable(selectable)
+	function createSelectable(selectable)
 	{
+		var tag = 'tr';
+		var memo = undefined;
+
 		selectable.selectable({
-			filter: 'tr'
+			filter: tag
+			, start: function (e, ui)
+			{
+				var sel = $('.' + uiSelected, e.target);
+				var all = $(tag, e.target);
+				if (sel.length === 0) return;
+
+				var from = all.index(sel.get(0));
+				var to   = all.index(sel.get(sel.length - 1));
+				memo = [from, to];
+
+			}
+			, selected: function (e, ui)
+			{
+				var sel = ui.selected;
+				var all = $(sel.tagName, e.target);
+				var index = all.index(sel);
+				if (e.shiftKey && memo !== undefined)
+				{
+					console.log(memo);
+				}
+
+			}
+			, unselected: function (e, ui)
+			{
+			}
+			, stop: function (e, ui)
+			{
+			}
 		});
 	}
 }
@@ -256,10 +289,12 @@ function makeUpTable(table)
 	background: #eee;
 	cursor: pointer;
 }
-#table1 .ui-selectable .ui-selectee.ui-selecting, 
-#table1 .ui-selectable .ui-selectee.ui-selected
+#table1 .ui-selectee.ui-selecting, 
+#table1 .ui-selectee.ui-selected, 
+#table1 .ui-selecting, 
+#table1 .ui-selected
 {
-	background: #ccc;
+	background: #ccc ;
 }
 </style>
 @endpush
