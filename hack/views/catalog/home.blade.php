@@ -143,7 +143,7 @@ $(function ()
 	{
 		var input = search;
 		var text = input.val().trim();
-		var selected = selectData(full, text);
+		var selected = filterData(full, text);
 		displayData(table, selected);
 	}
 	function displayData(table, data)
@@ -162,9 +162,9 @@ $(function ()
 			});
 		});
 
-		makeUpTable(table);//****************************
+		selectableTable(table);//****************************
 	}
-	function selectData(full, text)
+	function filterData(full, text)
 	{
 		if (text === '') return full;
 		var selected = $.grep(full, function (row, index)
@@ -204,7 +204,7 @@ $(function ()
 @push('scripts')
 @endpush
 <script>
-function makeUpTable(table)
+function selectableTable(table)
 {
 	// elements
 	var selectable = table.find('tbody');
