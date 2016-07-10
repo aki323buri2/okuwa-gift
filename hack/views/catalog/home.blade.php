@@ -214,8 +214,9 @@ function selectableTable(table)
 	var uiSelected = 'ui-selected';
 
 	toggle.on('click', toggleSelectable);
-	toggleSelectable.apply(toggle);
-	
+	toggleSelectable.apply(toggle);	
+
+	selectable.find('tr:first-child').addClass(uiSelected);
 	
 	function toggleSelectable()
 	{
@@ -241,7 +242,7 @@ function selectableTable(table)
 		var tag = 'tr';
 		var memo = undefined;
 
-		selectable.selectable({
+		selectable = selectable.selectable({
 			filter: tag
 			, start: function (e, ui)
 			{
@@ -254,14 +255,17 @@ function selectableTable(table)
 				memo = [from, to];
 
 			}
-			, selected: function (e, ui)
+			, selecting: function (e, ui)
 			{
-				var sel = ui.selected;
+				var sel = ui.selecting;
 				var all = $(sel.tagName, e.target);
 				var index = all.index(sel);
 				if (e.shiftKey && memo !== undefined)
 				{
-					console.log(memo);
+					var nn = [memo[0], memo[1], index];
+					var max = Math.max.apply(null, nn);
+					var min = Math.min.apply(null, nn);
+					all.slice(min, 1 + max).addClass(uiSelected);
 				}
 
 			}
@@ -272,6 +276,7 @@ function selectableTable(table)
 			{
 			}
 		});
+		return selectable;
 	}
 }
 </script>
