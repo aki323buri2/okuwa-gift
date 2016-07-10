@@ -209,6 +209,7 @@ function selectableTable(table)
 	// elements
 	var selectable = table.find('tbody');
 	var toggle = $('#toolmenu1');
+	var selall = table.find('thead > tr > th:first-child');
 	// class names
 	var uiSelectable = 'ui-selectable';
 	var uiSelected = 'ui-selected';
@@ -227,10 +228,7 @@ function selectableTable(table)
 		me.text('行選択 : ' + (off ? 'オフ' : 'オン'));
 		if (off)
 		{
-			if (selectable.hasClass(uiSelectable))
-			{
-				selectable.selectable('destroy');
-			}
+			destroySelectable(selectable);
 		}
 		else
 		{
@@ -269,13 +267,34 @@ function selectableTable(table)
 				}
 
 			}
+			, selected: function (e, ui)
+			{
+			}
 			, unselected: function (e, ui)
 			{
 			}
 			, stop: function (e, ui)
 			{
+				var fullSelected = selectable.find('tr:not(.' + uiSelected + ')').length === 0;
+				fullSelected ? selall.addClass(uiSelected) : selall.removeClass(uiSelected);
 			}
 		});
+		selall.on('click', function (e)
+		{
+			var me = $(this).toggleClass(uiSelected);
+			var on = me.hasClass(uiSelected);
+			var el = selectable.find('tr');
+			on ? el.addClass(uiSelected) : el.removeClass(uiSelected);
+		});
+		return selectable;
+	}
+	function destroySelectable(selectable)
+	{
+		if (selectable.hasClass(uiSelectable))
+		{
+			selectable.selectable('destroy');
+			selall.off('click');
+		}
 		return selectable;
 	}
 }
