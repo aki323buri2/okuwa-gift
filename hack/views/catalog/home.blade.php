@@ -130,6 +130,7 @@ $(function ()
 	search.find('~ .search.icon').on('click', doSearch);
 
 	doSearch();
+	selectableTable(table);//****************************
 	
 	function resetSearch()
 	{
@@ -162,7 +163,6 @@ $(function ()
 			});
 		});
 
-		selectableTable(table);//****************************
 	}
 	function filterData(full, text)
 	{
@@ -284,6 +284,7 @@ function selectableTable(table)
 			var on = me.hasClass(uiSelected);
 			selectAllSelectable(on);
 		});
+		selall.addClass('selall');
 		return selectable;
 	}
 	function selectAllSelectable(on)
@@ -296,11 +297,12 @@ function selectableTable(table)
 		if (selectable.hasClass(uiSelectable))
 		{
 			selectable.selectable('destroy');
+			selall.off('click');
+			selall.removeClass('selall');
 
 			//選択状態もオフる
 			selectAllSelectable(false);
 			selall.removeClass(uiSelected);
-			selall.off('click');
 			
 		}
 		return selectable;
@@ -312,7 +314,7 @@ function selectableTable(table)
 /* =================================
  *     for jquery ui selectable
  * ================================= */
-#table1 thead th:first-child
+#table1 thead th:first-child.selall
 {
 	cursor: pointer;
 }
