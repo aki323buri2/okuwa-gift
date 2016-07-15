@@ -1,8 +1,9 @@
 @extends('layouts/topbar')
-@section('title', '商品カタログ')
+@section('title', '商品カタログ - 表形式で編集')
 <?php
 $columns = $catalog->getColumns();
-$data = $catalog->all();
+$data = $cache;
+$data = json_decode($data);
 
 $todo = [
 	['created_at', '150px', '登録時刻', 'text', true], 
@@ -135,7 +136,7 @@ $(function ()
 	function getFullData()
 	{
 		var data = [];
-		@foreach ($data as $row)
+		@foreach ((array)$data as $row)
 			(function () {
 				var object = {};
 				@foreach ($columns as $name => $column)

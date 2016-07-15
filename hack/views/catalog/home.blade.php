@@ -125,9 +125,11 @@ $(function ()
 	var table = $('#table1');
 	var search = $('#search input:first-child');
 	var toggleSelectable = $('#toolmenu1');
+	var spreadEditor = $('#toolmenu2');
 
 	searchableTable(table, search);
 	selectableTable(table, toggleSelectable);//****************************
+	showSpreadEditorButton(table, spreadEditor);
 });
 </script>
 <script>
@@ -136,6 +138,7 @@ function searchableTable(table, search)
 	var full = getFullData();
 	search.find('~ .remove.icon').on('click', resetSearch);
 	search.find('~ .search.icon').on('click', doSearch);
+
 	doSearch();
 
 	function resetSearch()
@@ -165,6 +168,8 @@ function searchableTable(table, search)
 			{
 				var td = $('<td>').appendTo(tr);
 				td.addClass(name);
+				td.data('name', name);
+				td.data('value', value);
 				td.text(value);
 			});
 		});
@@ -204,6 +209,8 @@ function searchableTable(table, search)
 		@endforeach
 		return objects;
 	}
+
+	return table;
 }
 </script>
 @endpush
@@ -230,6 +237,7 @@ function selectableTable(table, toggle)
 		me.toggleClass(cn);
 		var off = me.hasClass(cn);
 		me.text('行選択 : ' + (off ? 'オン' : 'オフ'));
+		me.prepend($('<i>').addClass(off ? 'hand pointer' : 'hand paper').addClass('icon'));
 		if (off)
 		{
 			destroySelectable(selectable);
@@ -312,6 +320,8 @@ function selectableTable(table, toggle)
 		}
 		return selectable;
 	}
+
+	return table;
 }
 </script>
 @push('styles')
@@ -336,4 +346,48 @@ function selectableTable(table, toggle)
 	background: #ccc ;
 }
 </style>
+@endpush
+@push('scripts')
+<script>
+function showSpreadEditorButton(table, button)
+{
+	button.text('表形式で編集');
+	button.prepend($('<i>').addClass('table icon'));
+	button.on('click', showSpreadEditor);
+
+	function showSpreadEditor()
+	{
+		var selected = table.find('tbody tr.ui-selected');
+		if (selected.length === 0) return;
+
+		var objects = [];
+		$.each(selected, function (index, row)
+		{
+			row = $(row);
+			var object = {};
+			row.find('> td').each(function ()
+			{
+				var td = $(this);
+				var data = td.data();
+				if (data.name === undefined) return;
+				var name = data.name;
+				var value = data.value;
+				object[name] = value;
+			});
+			objects.push(object);
+		});
+
+		$.ajax({
+			url: '/catalog/session'
+			, method: 'post'
+			, data: {value: JSON.stringify(objects)}
+		})
+		.done(function (data)
+		{
+			location.href = '/catalog/spread';
+		})
+		;
+	}
+}
+</script>
 @endpush

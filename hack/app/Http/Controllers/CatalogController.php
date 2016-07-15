@@ -14,12 +14,13 @@ class CatalogController extends Controller
     static public function route()
     {
     	$class = '\\' . __class__;
-    	Route::get ('/catalog', $class . '@index');
-    	Route::post('/catalog/session', $class . '@session');
-    	Route::get ('/catalog/validator', $class . '@validator');
-    	Route::post('/catalog/check-update', $class . '@checkUpdate');
-        Route::post('/catalog/do-update', $class . '@doUpdate');
-    	Route::get ('/catalog/search', $class . '@search');
+    	Route::get ('/catalog', $class.'@index');
+    	Route::post('/catalog/session', $class.'@session');
+    	Route::get ('/catalog/validator', $class.'@validator');
+    	Route::post('/catalog/check-update', $class.'@checkUpdate');
+        Route::post('/catalog/do-update', $class.'@doUpdate');
+    	Route::get ('/catalog/search', $class.'@search');
+        Route::get ('/catalog/spread', $class.'@spread');
     }
 	
 	protected $catalog;
@@ -47,6 +48,10 @@ class CatalogController extends Controller
     {
     	return $this->showView('catalog/home', $request);
     }
+    public function spread(Request $request)
+    {
+        return $this->showView('catalog/spread', $request);
+    }
     public function validator(Request $request)
     {
     	return $this->showView('catalog/validator', $request);
@@ -62,8 +67,6 @@ class CatalogController extends Controller
     	$find = $catalog->find($catno);
 
     	$update = $find ? 'update' : 'insert';
-
-
 
     	$result = (object)[];
     	$result->update = $update;
@@ -111,4 +114,6 @@ class CatalogController extends Controller
 
         return $search;
     }
+
+    
 }
