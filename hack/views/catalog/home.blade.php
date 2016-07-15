@@ -236,7 +236,7 @@ function selectableTable(table, toggle)
 		var cn = 'ui-selectable-off';
 		me.toggleClass(cn);
 		var off = me.hasClass(cn);
-		me.text('行選択 : ' + (off ? 'オン' : 'オフ'));
+		me.text('行選択を' + (off ? 'オン' : 'オフ'));
 		me.prepend($('<i>').addClass(off ? 'hand pointer' : 'hand paper').addClass('icon'));
 		if (off)
 		{
