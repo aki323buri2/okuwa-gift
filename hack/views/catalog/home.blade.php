@@ -217,7 +217,6 @@ function selectableTable(table)
 	toggle.on('click', toggleSelectable);
 	toggleSelectable.apply(toggle);	
 
-	selectable.find('tr:first-child').addClass(uiSelected);
 	
 	function toggleSelectable()
 	{
@@ -225,7 +224,7 @@ function selectableTable(table)
 		var cn = 'ui-selectable-off';
 		me.toggleClass(cn);
 		var off = me.hasClass(cn);
-		me.text('行選択 : ' + (off ? 'オフ' : 'オン'));
+		me.text('行選択 : ' + (off ? 'オン' : 'オフ'));
 		if (off)
 		{
 			destroySelectable(selectable);
@@ -283,17 +282,26 @@ function selectableTable(table)
 		{
 			var me = $(this).toggleClass(uiSelected);
 			var on = me.hasClass(uiSelected);
-			var el = selectable.find('tr');
-			on ? el.addClass(uiSelected) : el.removeClass(uiSelected);
+			selectAllSelectable(on);
 		});
 		return selectable;
+	}
+	function selectAllSelectable(on)
+	{
+		var el = selectable.find('tr');
+		on ? el.addClass(uiSelected) : el.removeClass(uiSelected);
 	}
 	function destroySelectable(selectable)
 	{
 		if (selectable.hasClass(uiSelectable))
 		{
 			selectable.selectable('destroy');
+
+			//選択状態もオフる
+			selectAllSelectable(false);
+			selall.removeClass(uiSelected);
 			selall.off('click');
+			
 		}
 		return selectable;
 	}
