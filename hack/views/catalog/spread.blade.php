@@ -69,13 +69,13 @@ $links_more = array_merge((array)@$links_more, [
 @endpush
 @section('content')
 <p>
-	商品カタログ
+	商品カタログを表形式で編集
 
 	<div class="ui form">
 		<div class="inline fields">
 			<div class="ui icon input field" id="search">
-				<input type="text" placeholder="商品カタログ検索">
-				<i class="search link icon"></i>
+				<input type="text" placeholder="編集対象をさらに検索">
+				<i class="remove link icon"></i>
 			</div>
 			<div class="field" id="monitor">monitor..</div>
 			
@@ -93,29 +93,42 @@ $links_more = array_merge((array)@$links_more, [
 <script>
 $(function ()
 {
+	var table = $('#table1');
 	var search = $('#search > input:first-child');
 	var monitor = $('#monitor');
-	var button = search.find(' + i.icon');
-	search.on('input change', doSearch);
-	button.on('click', doSearch);
+	var showValidator = $('#button1');
 
+	table = handson(table);
+	searchInput(table, search, monitor);
+
+	search.trigger('input');
+
+	showValidatorButton(table, showValidator);
+
+});
+</script>
+@endpush
+
+@push('scripts')
+<script>
+
+function handson(el)
+{
 	var full = getFullData();
 	var selected = [];//検索結果
 	var sel2full = [];//関係表
-	var table = handson($('#table1'));
-	search.trigger('input');
+	
+	table = el.handsontable({
+		columns: handsonColumns()
+		, rowHeaders: true
+		, search: true
+	});
+	table = table.handsontable('getInstance');
 
-	var validator = $('#button1').text('更新の確認').on('click', showValidator);
+	table.full = full;
+	table.selected = selected;
+	table.sel2full = sel2full;
 
-	function handson(el)
-	{
-		table = el.handsontable({
-			columns: handsonColumns()
-			, rowHeaders: true
-			, search: true
-		});
-		return table.handsontable('getInstance');
-	}
 	function handsonColumns()
 	{
 		var columns = [];
@@ -147,8 +160,40 @@ $(function ()
 		@endforeach
 		return data;
 	}
+
+	return table;
+}
+
+</script>
+@endpush
+
+@push('scripts')
+<script>
+function searchInput(table, input, monitor)
+{
+	table.monitor = monitor;
+
+	var reset = input.find('~ i.remove.icon');
+	input.on('input change', doSearch);
+	reset.on('click', resetSearch);
+
+	function resetSearch(e)
+	{
+		e.preventDefault();
+		e.stopPropagation();
+		input.val('');
+		input.select();
+		input.trigger('input');
+	}
 	function doSearch(e)
 	{
+		var search = $(this);
+		var monitor = table.monitor;
+
+		var full = table.full;
+		var selected = table.selected;
+		var sel2full = table.sel2full;
+
 		var query = search.val().trim();
 		selected = [];//検索結果リストのリセット
 		sel2full = [];//関係表リセット
@@ -180,6 +225,15 @@ $(function ()
 		var text = selected.length + ' / ' + full.length + ' 件を表示';
 		monitor.text(text);
 	}
+}
+</script>
+@endpush
+
+@push('scripts')
+<script>
+function showValidatorButton(table, button)
+{
+	button.text('更新の確認').on('click', showValidator);
 
 	function showValidator(e)
 	{
@@ -211,6 +265,6 @@ $(function ()
 		})
 		;
 	}
-});
+}
 </script>
 @endpush
