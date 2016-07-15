@@ -123,15 +123,21 @@ $columns = $columns->merge($objects);
 $(function ()
 {
 	var table = $('#table1');
-	var full = getFullData();
-
 	var search = $('#search input:first-child');
+	var toggleSelectable = $('#toolmenu1');
+
+	searchableTable(table, search);
+	selectableTable(table, toggleSelectable);//****************************
+});
+</script>
+<script>
+function searchableTable(table, search)
+{
+	var full = getFullData();
 	search.find('~ .remove.icon').on('click', resetSearch);
 	search.find('~ .search.icon').on('click', doSearch);
-
 	doSearch();
-	selectableTable(table);//****************************
-	
+
 	function resetSearch()
 	{
 		var input = search;
@@ -198,17 +204,16 @@ $(function ()
 		@endforeach
 		return objects;
 	}
-});
+}
 </script>
 @endpush
 @push('scripts')
 @endpush
 <script>
-function selectableTable(table)
+function selectableTable(table, toggle)
 {
 	// elements
 	var selectable = table.find('tbody');
-	var toggle = $('#toolmenu1');
 	var selall = table.find('thead > tr > th:first-child');
 	// class names
 	var uiSelectable = 'ui-selectable';
