@@ -33,6 +33,7 @@ $data = json_decode($data);
 #table1 td.no
 {
 	background: #ecf0f1; 
+
 }
 
 #table1 tbody tr.insert td:not(.no):not(.status)
@@ -42,8 +43,13 @@ $data = json_decode($data);
 }
 #table1 tbody tr.update td:not(.no):not(.status)
 {
-	color: #fff;
-	background: #2980b9;
+	/*color: #fff;*/
+	/*background: #2980b9;*/
+	background: rgba( 41,128,185,.3);
+}
+#table1 tbody tr.update td:not(.no):not(.status).dirty
+{
+	background: #f1c40f
 }
 
 </style>
@@ -167,15 +173,24 @@ $(function ()
 		{
 			data = JSON.parse(data);
 			var update = data.update;
+			var dirty = JSON.parse(data.dirty);
+			
 			var title = 
 				update === 'insert' ? '新規登録' : (
-				update === 'update' ? '修正登録' : 
+				update === 'update' ? '修正登録' : (
+				update === 'nochange' ? '変更なし' : 
 				update
-				);
+				));
 
 			td.text(title);
 			tr.removeClass('insert update').addClass(update);
 			tr.data('update', update);
+
+			tr.find('td').removeClass('dirty');
+			$.each(dirty, function (name, value)
+			{
+				tr.find('td.' + name).addClass('dirty');
+			});
 
 			tr.removeClass('checking');
 			if (tr.parent().find('.checking').length === 0)

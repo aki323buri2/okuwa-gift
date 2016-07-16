@@ -68,8 +68,21 @@ class CatalogController extends Controller
 
     	$update = $find ? 'update' : 'insert';
 
+        $dirty = [];
+        if ($update === 'update')
+        {
+            foreach ($data as $name => $value)
+            {
+                $find->$name = $value;
+            }
+            $dirty = $find->getDirty();
+        }
+
+        if (count($dirty) === 0) $update = 'nochange';
+
     	$result = (object)[];
     	$result->update = $update;
+        $result->dirty = json_encode($dirty);
     	return json_encode($result);
     }
     public function doUpdate(Request $request)
