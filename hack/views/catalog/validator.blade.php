@@ -1,4 +1,4 @@
-@extends('layouts/sidebar')
+@extends('layouts/topbar')
 @section('title', '商品カタログ - 更新の確認')
 <?php
 $columns = $catalog->getColumns();
@@ -7,6 +7,14 @@ $data = json_decode($data);
 ?>
 @push('styles')
 <style>
+#topbar
+{
+	margin-bottom: 1rem;
+}
+#content
+{
+	margin-left: 2rem;
+}
 #table1
 {
 	/*width: auto;*/
@@ -125,55 +133,26 @@ $(function ()
 	var save = $('#smenu3');
 
 	backButton(table, back);
-	reload.text('最新の情報に更新').on('click', checkUpdates);
+	checkUpdateButton(table, reload);
+	saveButton(table, save);
+	updatableTable(table);
 
-	checkUpdates();
+	reload.trigger('click');
 
 	selectRowBehavior(table);
+});
+</script>
+@endpush
+@push('scripts')
+<script>	
+// ===========================================================
+function checkUpdateButton(table, button)
+{
+	button.text('最新の情報に更新').on('click', checkUpdates);
+	button.prepend($('<i>').addClass('refresh icon'));
 
-	function saveStatus(status)
-	{
-		var button = save;
-		switch (status)
-		{
-		case 'checking': 
-			button.text('更新を確認しています').off('click');
-			break;
-		case 'ready': 
-			button.text('データを更新する').on('click', doUpdates);
-			break;
-		}
-	}
-	function backButton(table, button)
-	{
-		button.text('表形式編集へ戻る').on('click', backToSpread);
-		function backToSpread()
-		{
-			var objects = [];
+	table.getDataFromRow = getDataFromRow;
 
-			@foreach ((array)$data as $row)
-				(function ()
-				{
-					var object = {};
-					@foreach ($row as $name => $value)
-						object.{{ $name }} = '{{ $value }}';
-					@endforeach
-					objects.push(object);
-				})();
-			@endforeach
-			
-			$.ajax({
-				url: '/catalog/session'
-				, method: 'post'
-				, data: { value: JSON.stringify(objects) }
-			})
-			.done(function (data)
-			{
-				location.href = '/catalog/spread';
-			})
-			;
-		}
-	}
 	function checkUpdates()
 	{
 		var thead = table.find('thead');
@@ -193,7 +172,7 @@ $(function ()
 		var td = tr.find('.status');
 		var data = getDataFromRow(tr);
 
-		saveStatus('checking');
+		table.saveStatus('checking');
 
 		$.ajax({
 			url: '/catalog/check-update'
@@ -228,12 +207,10 @@ $(function ()
 			tr.removeClass('checking');
 			if (tr.parent().find('.checking').length === 0)
 			{
-				saveStatus('ready');
+				table.saveStatus('ready');
 			}
 		});
 	}
-	
-
 	function getDataFromRow(tr)
 	{
 		var data = {};
@@ -246,10 +223,78 @@ $(function ()
 		});
 		return data;
 	}
+}
+</script>
+@endpush
+@push('scripts')
+<script>
+// ===========================================================
+function backButton(table, button)
+{
+	button.text('表形式編集へ戻る').on('click', backToSpread);
+	button.prepend($('<i>').addClass('backward icon'));
+	function backToSpread()
+	{
+		var objects = [];
+
+		@foreach ((array)$data as $row)
+			(function ()
+			{
+				var object = {};
+				@foreach ($row as $name => $value)
+					object.{{ $name }} = '{{ $value }}';
+				@endforeach
+				objects.push(object);
+			})();
+		@endforeach
+		
+		$.ajax({
+			url: '/catalog/session'
+			, method: 'post'
+			, data: { value: JSON.stringify(objects) }
+		})
+		.done(function (data)
+		{
+			location.href = '/catalog/spread';
+		})
+		;
+	}
+}
+</script>
+@endpush
+@push('scripts')
+<script>
+// ===========================================================
+function saveButton(table, button)
+{
+	table.saveStatus = function (status)
+	{
+		switch (status)
+		{
+		case 'checking': 
+			button.empty().text('更新を確認しています').off('click');
+			button.prepend($('<i>').addClass('fa fa-spinner fa-spin fa-puls'));
+			break;
+		case 'ready': 
+			button.empty().text('データを更新する').on('click', table.doUpdates);
+			button.prepend($('<i>').addClass('database icon'));
+			break;
+		}
+	}
+}
+</script>
+@endpush
+@push('scripts')
+<script>
+// ===========================================================
+function updatableTable(table)
+{
+	table.doUpdates = doUpdates;
 
 	function doUpdates()
 	{
-		var rows = table.find('> tbody > tr');
+		var rows = table.find('> tbody').find('.insert, .update');
+
 		rows.addClass('updating');
 		rows.each(function ()
 		{
@@ -261,7 +306,7 @@ $(function ()
 	{
 		var td = tr.find('.status');
 		var update = tr.data('update');
-		var data = getDataFromRow(tr);
+		var data = table.getDataFromRow(tr);
 
 		updateStatus(td, 'updating');
 
@@ -291,27 +336,46 @@ $(function ()
 		})
 		;
 	}
+	function updateStatus(td, status)
+	{
+		var tr = td.closest('tr');
+
+		tr.addClass(status);
+		
+		var update = tr.data('update');
+		var text = 
+			update === 'insert' ? '追加' : (
+			update === 'update' ? '更新' : (
+			update
+			));
+
+		switch (status)
+		{
+		case 'updating': 
+			td.empty().text(text + 'しています・・・');
+			td.prepend($('<i>').addClass('fa fa-spinner fa-spin fa-puls'));
+			break;
+		case 'done': 
+			td.empty().text(text + 'が正常に終了しました');
+			tr.removeClass(update);
+			break;
+		case 'error':
+			td.empty().text(text + 'が異常終了しました！！！');
+			break;
+		}
+	}
 	function onUpdatesFinished()
 	{
 	}
-	function updateStatus(td, status)
-	{
-		td.text(status);
-		if (status === 'updating')
-		{
-			td.prepend($('<i>').addClass('fa fa-spinner fa-spin fa-pulse'));
-		}
-		else
-		{
-			td.find('i:first-child').remove();
-		}
-	}
+}
+</script>
+@endpush
+@push('scripts')
+<script>
+function selectRowBehavior(table)
+{
+	
 
-	function selectRowBehavior(table)
-	{
-		
-
-	}
-});
+}
 </script>
 @endpush
