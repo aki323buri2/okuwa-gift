@@ -93,8 +93,8 @@ $columns = $columns->merge($objects);
 
 <div class="ui secondary menu">
 	@foreach (range(1, 10) as $no)
-		<a href="#" class="item" id="toolmenu{{ $no }}">
-			Tool menu {{ $no }}
+		<a href="#" class="item" id="smenu{{ $no }}">
+			smenu {{ $no }}
 		</a>
 	@endforeach
 </div>
@@ -117,19 +117,38 @@ $columns = $columns->merge($objects);
 	<tbody>
 	</tbody>
 </table>
+
+<div class="ui modal" id="modal1">
+	<i class="close icon"></i>
+	<div class="header">
+		header
+	</div>
+	<div class="content">
+		content
+	</div>
+	<div class="actions">
+		<div class="ui approve button">Ok</div>
+		<div class="ui cancel button">Cancel</div>
+	</div>
+</div>
+
 @endsection
+
 @push('scripts')
 <script>
 $(function ()
 {
 	var table = $('#table1');
 	var search = $('#search input:first-child');
-	var toggleSelectable = $('#toolmenu1');
-	var spreadEditor = $('#toolmenu2');
+	var toggleSelectable = $('#smenu1');
+	var spreadEditor = $('#smenu2');
+	var remove = $('#smenu3');
+	var removePrompt = $('#modal1');
 
 	searchableTable(table, search);
 	selectableTable(table, toggleSelectable);//****************************
 	showSpreadEditorButton(table, spreadEditor);
+	removeSelectedRowsButton(table, remove, removePrompt);
 });
 </script>
 <script>
@@ -351,7 +370,7 @@ function selectableTable(table, toggle)
 <script>
 function showSpreadEditorButton(table, button)
 {
-	button.text('表形式で編集');
+	button.text('選択された行を表形式で編集');
 	button.prepend($('<i>').addClass('table icon'));
 	button.on('click', showSpreadEditor);
 
@@ -387,6 +406,49 @@ function showSpreadEditorButton(table, button)
 			location.href = '/catalog/spread';
 		})
 		;
+	}
+}
+</script>
+@endpush
+@push('scripts')
+<script>
+function removeSelectedRowsButton(table, button, prompt)
+{
+	button.text('選択された行を削除').on('click', removeSelectedRows);
+	button.prepend($('<i>').addClass('erase icon'));
+
+	function removeSelectedRows(e)
+	{
+		var selected = table.find('tbody').find('tr.ui-selected');
+		if (selected.length === 0) return;
+
+		prompt.modal({
+			blurring: true
+			, onDeny: onDeny
+			, onApprove: onApprove
+		})
+		.modal('show')
+		;
+		function onDeny()
+		{
+			console.log('cancel');
+		}
+		function onApprove()
+		{
+			doRemove(selected);
+		}
+		function doRemove(selected)
+		{
+			selected.each(function ()
+			{
+				var tr = $(this);
+				doRemoveRow(tr);
+			});
+		}
+		function doRemoveRow(tr)
+		{
+			
+		}
 	}
 }
 </script>

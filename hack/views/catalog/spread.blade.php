@@ -40,10 +40,6 @@ $links_more = array_merge((array)@$links_more, [
 {
 	width: 30rem;
 }
-#monitor
-{
-	width: 15rem;
-}
 #search > input:first-child
 {
 	border-radius: 1rem;
@@ -70,23 +66,27 @@ $links_more = array_merge((array)@$links_more, [
 @section('content')
 <p>
 	商品カタログを表形式で編集
-
-	<div class="ui form">
-		<div class="inline fields">
-			<div class="ui icon input field" id="search">
-				<input type="text" placeholder="編集対象をさらに検索">
-				<i class="remove link icon"></i>
-			</div>
-			<div class="field" id="monitor">monitor..</div>
-			
-			<div class="ui buttons field">
-				@foreach (range(1, 10) as $no)
-					<div class="ui button" id="button{{ $no }}">Button {{ $no }}</div>
-				@endforeach
-			</div>
-		</div>
-	</div>
 </p>
+
+<div class="ui secondary menu">
+	@foreach (range(1, 10) as $no)
+		<a href="#" class="item" id="smenu{{ $no }}">
+			smenu {{ $no }}
+		</a>
+	@endforeach
+</div>
+
+<div class="ui form">
+	<div class="inline fields">
+		<div class="ui icon input field" id="search">
+			<input type="text" placeholder="編集対象をさらに検索">
+			<i class="remove link icon"></i>
+		</div>
+		<div class="field" id="monitor">monitor..</div>
+		
+	</div>
+</div>
+
 <div id="table1"></div>
 @endsection
 @push('scripts')
@@ -96,7 +96,8 @@ $(function ()
 	var table = $('#table1');
 	var search = $('#search > input:first-child');
 	var monitor = $('#monitor');
-	var showValidator = $('#button1');
+	var back = $('#smenu1');
+	var showValidator = $('#smenu2');
 
 	table = handson(table);
 	searchInput(table, search, monitor);
@@ -104,6 +105,8 @@ $(function ()
 	search.trigger('input');
 
 	showValidatorButton(table, showValidator);
+
+	backToHomeButton(table, back);
 
 });
 </script>
@@ -234,6 +237,7 @@ function searchInput(table, input, monitor)
 function showValidatorButton(table, button)
 {
 	button.text('更新の確認').on('click', showValidator);
+	button.prepend($('<i>').addClass('feed icon'));
 
 	function showValidator(e)
 	{
@@ -263,6 +267,20 @@ function showValidatorButton(table, button)
 			location.href = '/catalog/validator';
 		})
 		;
+	}
+}
+</script>
+@endpush
+@push('scripts')
+<script>
+function backToHomeButton(table, button)
+{
+	button.text('一覧に戻る').on('click', backToHome);
+	button.prepend($('<i>').addClass('arrow left icon'));
+
+	function backToHome(e)
+	{
+		location.href = '/catalog/home';
 	}
 }
 </script>

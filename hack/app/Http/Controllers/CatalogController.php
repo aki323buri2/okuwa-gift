@@ -14,7 +14,8 @@ class CatalogController extends Controller
     static public function route()
     {
     	$class = '\\' . __class__;
-    	Route::get ('/catalog', $class.'@index');
+        Route::get ('/catalog', $class.'@index');
+    	Route::get ('/catalog/home', $class.'@index');
     	Route::post('/catalog/session', $class.'@session');
     	Route::get ('/catalog/validator', $class.'@validator');
     	Route::post('/catalog/check-update', $class.'@checkUpdate');
