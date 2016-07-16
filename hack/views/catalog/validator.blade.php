@@ -59,10 +59,10 @@ $data = json_decode($data);
 	商品カタログ - 更新の確認
 </p>
 <p>
-	<div class="ui buttons">
+	<div class="ui secondary menu">
 		@foreach (range(1, 10) as $no)
-			<a href="#" class="ui button" id="button{{ $no }}">
-				Button {{ $no }}
+			<a href="#" class="ui item" id="smenu{{ $no }}">
+				smenu {{ $no }}
 			</a>
 		@endforeach
 	</div>
@@ -120,8 +120,12 @@ $data = json_decode($data);
 $(function ()
 {
 	var table = $('#table1');
-	var reload = $('#button1').text('最新の情報に更新').on('click', checkUpdates);
-	var save = $('#button2');
+	var back = $('#smenu1');
+	var reload = $('#smenu2');
+	var save = $('#smenu3');
+
+	backButton(table, back);
+	reload.text('最新の情報に更新').on('click', checkUpdates);
 
 	checkUpdates();
 
@@ -140,7 +144,36 @@ $(function ()
 			break;
 		}
 	}
+	function backButton(table, button)
+	{
+		button.text('表形式編集へ戻る').on('click', backToSpread);
+		function backToSpread()
+		{
+			var objects = [];
 
+			@foreach ((array)$data as $row)
+				(function ()
+				{
+					var object = {};
+					@foreach ($row as $name => $value)
+						object.{{ $name }} = '{{ $value }}';
+					@endforeach
+					objects.push(object);
+				})();
+			@endforeach
+			
+			$.ajax({
+				url: '/catalog/session'
+				, method: 'post'
+				, data: { value: JSON.stringify(objects) }
+			})
+			.done(function (data)
+			{
+				location.href = '/catalog/spread';
+			})
+			;
+		}
+	}
 	function checkUpdates()
 	{
 		var thead = table.find('thead');

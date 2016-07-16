@@ -252,7 +252,6 @@ function showValidatorButton(table, button)
 			});
 			objects.push(object);
 		});
-		console.log(objects);
 
 		$.ajax({
 			url: '/catalog/session'
